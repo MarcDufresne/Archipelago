@@ -54,6 +54,13 @@ jobs:
         with:
           python-version: '~3.12.7'
           check-latest: true
+      - name: Download run-time dependencies
+        run: |
+          # Enemizer (for the ALttP enemizer option). Only an x86_64 build is
+          # published upstream; it runs natively on Intel and under Rosetta 2
+          # on Apple Silicon. Use the .zip so we can extract with macOS' unzip.
+          curl -sSL -o enemizer.zip "https://github.com/Ijwu/Enemizer/releases/download/${ENEMIZER_VERSION}/osx.10.12-x64.zip"
+          unzip -q enemizer.zip -d EnemizerCLI
       - name: Build
         run: |
           # charset-normalizer is installed explicitly (as on Linux) so the
@@ -98,6 +105,17 @@ jobs:
           cd build/exe*
           cp Players/Templates/VVVVVV.yaml Players/
           ./ArchipelagoGenerate
+      - name: Verify feature-parity binaries are bundled
+        shell: bash
+        run: |
+          # ROM-dependent generation (OoT, ALttP-enemizer) can't run in CI, so
+          # at least assert the native helpers were bundled for this arch.
+          cd build/exe*
+          OOT="$(find . -name Compress.out | head -1)"
+          ENEM="$(find . -name EnemizerCLI.Core | head -1)"
+          echo "OoT compressor: $OOT"; echo "Enemizer: $ENEM"
+          [ -n "$OOT" ] && lipo -info "$OOT" || { echo "::error::OoT Compress.out missing"; exit 1; }
+          [ -n "$ENEM" ] || { echo "::error::EnemizerCLI.Core missing"; exit 1; }
       - name: Store zip
         uses: actions/upload-artifact@v7.0.0
         with:
