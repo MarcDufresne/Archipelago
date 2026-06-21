@@ -183,6 +183,12 @@ check_lock = threading.Lock()
 
 
 def check_enemizer(enemizercli):
+    # NOTE (macOS / Apple Silicon): upstream Enemizer ships an x86_64 build
+    # only (Ijwu/Enemizer has no arm64 release), so on Apple Silicon it runs
+    # under Rosetta 2. Rosetta is deprecated as of macOS 26 (warnings) and is
+    # slated for removal in macOS 28 -- at which point the enemizer option will
+    # stop working on Apple Silicon until an arm64 Enemizer exists. This check
+    # only verifies presence/version; the actual exec is in patch_enemizer().
     if getattr(check_enemizer, "done", None):
         return
     if not os.path.exists(enemizercli) and not os.path.exists(enemizercli + ".exe"):

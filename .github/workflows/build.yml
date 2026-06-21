@@ -57,8 +57,14 @@ jobs:
       - name: Download run-time dependencies
         run: |
           # Enemizer (for the ALttP enemizer option). Only an x86_64 build is
-          # published upstream; it runs natively on Intel and under Rosetta 2
-          # on Apple Silicon. Use the .zip so we can extract with macOS' unzip.
+          # published upstream (Ijwu/Enemizer has no arm64 release), so it runs
+          # natively on Intel and under Rosetta 2 on Apple Silicon.
+          # DEPRECATION: Rosetta 2 is deprecated as of macOS 26 (warnings) and
+          # is slated for removal in macOS 28. When that lands, the enemizer
+          # option will stop working on Apple Silicon until an arm64 Enemizer
+          # build exists; everything else here is native (OoT helpers are
+          # universal2, SNI is darwin-universal) and unaffected.
+          # Use the .zip so we can extract with macOS' built-in unzip.
           curl -sSL -o enemizer.zip "https://github.com/Ijwu/Enemizer/releases/download/${ENEMIZER_VERSION}/osx.10.12-x64.zip"
           unzip -q enemizer.zip -d EnemizerCLI
       - name: Build
